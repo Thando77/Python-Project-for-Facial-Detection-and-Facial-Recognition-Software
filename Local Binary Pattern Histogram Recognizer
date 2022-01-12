@@ -1,0 +1,37 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Nov 13 22:46:12 2021
+
+@author: tmdis
+"""
+
+import cv2
+import NameFind
+
+face_cascade = cv2.CascadeClassifier(r'C:\Users\tmdis\OneDrive\Documents\Lib\site-packages\cv2\data\haarcascade_frontalface_alt.xml')
+eye_cascade = cv2.CascadeClassifier(r'C:\Users\tmdis\OneDrive\Documents\Lib\site-packages\cv2\data\haarcascade_eye.xml')
+recognize = cv2.face.LBPHFaceRecognizer_create(2,2,7,7,15)
+recognize.read('trainingDataLBPH.xml')
+
+#cap = cv2.imread(r"C:\Users\tmdis\Music\Lutho.jpg")
+cap = cv2.VideoCapture(0)
+while True:
+    ret,img = cap.read()
+    gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    faces = face_cascade.detectMultiScale(gray,1.3,5)
+    
+    for(x,y,w,h) in faces:
+        gray_face = gray[y:y+h,x:x+w]
+        eyes = eye_cascade.detectMultiScale(gray_face)
+        for (ex,ey,ew,eh) in eyes:
+            ID,confidence = recognize.predict(gray_face)
+            NAME = NameFind.ID_to_Name(ID,confidence)
+            #NameFind.Drawing(x,y,w,h,ID,gray)
+            #NameFind.draw_box(gray, x, y, w, h)
+            cv2.putText(gray,NAME,(50,50),cv2.FONT_HERSHEY_DUPLEX,0.6,[255,255,255],2)
+    cv2.imshow("Local Binary Pattern Histogram Face Recognition System", gray)
+    if cv2.waitKey(2) & 0xFF == ord('s'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()        
