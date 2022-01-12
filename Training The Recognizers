@@ -1,0 +1,53 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Nov 15 03:25:02 2021
+
+@author: tmdis
+"""
+
+import cv2
+import os
+import numpy as np
+from PIL import Image
+
+Fisher = cv2.face.FisherFaceRecognizer_create(2)
+LBPH = cv2.face.LBPHFaceRecognizer_create(1,1,7,7)
+
+path = 'Database'
+
+def Get_imageWithID(path):
+    imagePaths = [os.path.join(path, f) for f in os.listdir(path)]
+    current_id = 0
+    FaceList = []
+    IDs = []
+    for imagePath in imagePaths:
+        
+        faceImage = Image.open(imagePath).convert('L')  # Open image and convert to gray
+        faceImage = faceImage.resize((110,110))         # resize the image so the EIGEN recogniser can be trained
+        faceNP = np.array(faceImage, 'uint8')  # convert the image to Numpy array
+        #int(float('55063.00000'))
+        #ID = int(float(imagePath))             
+        ID =(os.path.split(imagePath)[-1].split('.')[1])# Retreave the ID of the array
+        current_id +=1
+        ID = current_id
+        FaceList.append(faceNP)                         # Append the Numpy Array to the list
+        IDs.append(ID)                                 # Append the ID to the IDs list
+        cv2.imshow('Training Set', faceNP)              # Show the images in the list
+        cv2.waitKey(1)
+    return np.array(IDs), FaceList                      # The IDs are converted into a Numpy array
+IDs, FaceList = Get_imageWithID(path)
+
+# ------------------------------------ TRAINING THE RECOGNISER ----------------------------------------
+print('TRAINING......')
+Fisher.train(FaceList,np.array(IDs))
+print('FISHER FACE RECOGNISER COMPLETE...')
+Fisher.save('trainingDataFisher.xml')
+print('Fisher Face XML saved... ')
+LBPH.train(FaceList, IDs)
+print('LBPH FACE RECOGNISER COMPLETE...')
+LBPH.save('trainingDataLBPH.xml')
+print ('ALL XML FILES SAVED...')
+
+cv2.destroyAllWindows()
+    
+
