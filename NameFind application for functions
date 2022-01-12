@@ -1,0 +1,164 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Nov 15 01:41:27 2021
+
+@author: tmdis
+"""
+import cv2
+import math
+import time
+
+
+current = time.perf_counter()
+
+face = cv2.CascadeClassifier(r'C:\Users\tmdis\OneDrive\Documents\Lib\site-packages\cv2\data\haarcascade_frontalface_alt.xml')
+glass_cas = cv2.CascadeClassifier(r'C:\Users\tmdis\OneDrive\Documents\Lib\site-packages\cv2\data\haarcascade_eye.xml')
+
+WHITE = [255,255,255]
+NAME = float()
+
+def FileRead():
+    Info = open("profiles.txt", "r")
+    NAME = []
+    while True:
+        Line = Info.readline()
+        if Line =='':
+            break
+        
+    return NAME  
+
+Names = FileRead()
+a = str()
+
+def AddName():
+    Name = input("Enter Your Name! ")
+    Info = open("profiles.txt", "r+")
+    ID = ((sum(1 for line in Info))+1)
+    Info.write(str(ID) + "," + Name + "\n")
+    print("Name Stored in " + str(ID))
+    Info.close()
+    
+    return ID
+
+
+def ID_to_Name(ID,confidence):
+    
+    if ID > 0:
+        NameString =  ("Name:  " + str(ID)  +  "  Distance:  " + str(round(confidence))) 
+    elif ID <=0:
+        NameString = ("Face Not Recognized!!!")
+        
+    return NameString
+
+#def AddName():
+   # Name = input("Enter Your Name! ")
+   # Info = open("Names.txt", "r+")
+    #ID = ((sum(1 for line in Info))+1)
+    #Info.write(str(ID) + "," + Name + "\n")
+    #print("Name Stored in " + str(ID))
+    #Info.close()
+    #return ID#
+
+def DispID(x,y,w,h,NAME,ID,Image):
+    
+    Name_y_pos = y-10
+    Name_x_pos = x + w/2 - (len(str(NAME)))
+    
+    if Name_x_pos < 0:
+        Name_x_pos = 0
+        
+    elif(Name_x_pos +10 +  (len(str(NAME))*7)) > Image.shape[1]:
+        Name_x_pos = Name_x_pos - (Name_x_pos +10 + (len(str(NAME))*7) - (Image.shape[1]))
+    if Name_y_pos < 0:
+        Name_y_pos = Name_y_pos = y +h + 10
+        
+    #cv2.rectangle(Image, (50, 50), (100,100) , (0,0,0), -2)           # Draw a Black Rectangle over the face frame
+    #cv2.rectangle(Image, (50,50), (100,100), WHITE, 1) 
+    #cv2.putText(Image, NAME,ID, (100,100), cv2.FONT_HERSHEY_DUPLEX, 2, WHITE,3)
+    
+    cv2.rectangle(Image, (Name_x_pos-10, Name_y_pos-25), (Name_x_pos +10 + (len(str(NAME)) * 7), Name_y_pos-1), (0,0,0), -2)           # Draw a Black Rectangle over the face frame
+    cv2.rectangle(Image, (Name_x_pos-10, Name_y_pos-25), (Name_x_pos +10 + (len(str(NAME)) * 7), Name_y_pos-1), WHITE, 1) 
+    cv2.putText(Image, NAME, (Name_x_pos, Name_y_pos - 10), cv2.FONT_HERSHEY_DUPLEX, .4, WHITE)                         
+
+def draw_box(Image,x,y,w,h,NAME):
+    cv2.line(Image, (x, y), (x + (w/5) ,y), WHITE, 2)
+    cv2.line(Image, (x+((w/5)*4), y), (x+w, y), WHITE, 2)
+    cv2.line(Image, (x, y), (x, y+(h/5)), WHITE, 2)
+    cv2.line(Image, (x+w, y), (x+w, y+(h/5)), WHITE, 2)
+    cv2.line(Image, (x, (y+(h/5*4))), (x, y+h), WHITE, 2)
+    cv2.line(Image, (x, (y+h)), (x + (w/5) ,y+h), WHITE, 2)
+    cv2.line(Image, (x+((w/5)*4), y+h), (x + w, y + h), WHITE, 2)
+    cv2.line(Image, (x+w, (y+(h/5*4))), (x+w, y+h), WHITE, 2)
+    cv2.putText(Image, NAME,(x+w, (y+(h/5*4))), cv2.FONT_HERSHEY_DUPLEX,1, WHITE, 2)
+
+def DispID2(x, y, w, h, NAME, Image):
+    Name_y_pos = y - 40
+    Name_x_pos = x + w/2 - ((NAME)*7/2)
+
+    if Name_x_pos < 0:
+        Name_x_pos = 0
+    elif (Name_x_pos +10 + (len(NAME) * 7) > Image.shape[1]):
+          Name_x_pos= Name_x_pos - (Name_x_pos +10 + ((NAME) * 7) - (Image.shape[1]))
+    if Name_y_pos < 0:
+        Name_y_pos = Name_y_pos = y + h + 10
+          
+ #  ------------------------------------    THE DRAWING OF THE BOX AND ID   --------------------------------------
+    cv2.rectangle(Image, (Name_x_pos-10, Name_y_pos-25), (Name_x_pos +10 + ((NAME) * 7), Name_y_pos-1), (0,0,0), -2)           # Draw a Black Rectangle over the face frame
+    cv2.rectangle(Image, (Name_x_pos-10, Name_y_pos-25), (Name_x_pos +10 + ((NAME) * 7), Name_y_pos-1), WHITE, 1) 
+    cv2.putText(Image, NAME, (Name_x_pos, Name_y_pos - 10), cv2.FONT_HERSHEY_DUPLEX, .4, WHITE)                         # Print the name o 
+
+
+def DispID3(x,y,w,h,NAME,Image):
+
+    Name_y_pos = y - 70
+    Name_x_pos = x + w/2 - ((NAME)*7/2)
+
+    if Name_x_pos < 0:
+        Name_x_pos = 0
+    elif (Name_x_pos +10 + ((NAME) * 7) > Image.shape[1]):
+          Name_x_pos= Name_x_pos - (Name_x_pos +10 + ((NAME) * 7) - (Image.shape[1]))
+    if Name_y_pos < 0:
+        Name_y_pos = Name_y_pos = y + h + 10
+          
+ #  ------------------------------------    THE DRAWING OF THE BOX AND ID   --------------------------------------
+    cv2.rectangle(Image, (Name_x_pos-10, Name_y_pos-25), (Name_x_pos +10 + ((NAME) * 7), Name_y_pos-1), (0,0,0), -2)           # Draw a Black Rectangle over the face frame
+    cv2.rectangle(Image, (Name_x_pos-10, Name_y_pos-25), (Name_x_pos +10 + ((NAME) * 7), Name_y_pos-1), WHITE, 1) 
+    cv2.putText(Image, NAME, (Name_x_pos, Name_y_pos - 10), cv2.FONT_HERSHEY_DUPLEX, .4, WHITE)    
+
+
+def Drawing(Image,x,y,w,h,ID):
+    cv2.rectangle(Image,NAME, (50, 50), (100, 120), (255, 255, 255), 1)
+
+def Detect_Eyes(Image):
+    Theta = 0
+    rows, cols = Image.shape
+    glass = glass_cas.detectMultiScale(Image)                                               # This ditects the eyes
+    for (sx, sy, sw, sh) in glass:
+        if glass.shape[0] == 2:                                                             # The Image should have 2 eyes
+            if glass[1][0] > glass[0][0]:
+                DY = ((glass[1][1] + glass[1][3] / 2) - (glass[0][1] + glass[0][3] / 2))    # Height diffrence between the glass
+                DX = ((glass[1][0] + glass[1][2] / 2) - glass[0][0] + (glass[0][2] / 2))    # Width diffrance between the glass
+            else:
+                DY = (-(glass[1][1] + glass[1][3] / 2) + (glass[0][1] + glass[0][3] / 2))   # Height diffrence between the glass
+                DX = (-(glass[1][0] + glass[1][2] / 2) + glass[0][0] + (glass[0][2] / 2))   # Width diffrance between the glass
+
+            if (DX != 0.0) and (DY != 0.0):                                                 # Make sure the the change happens only if there is an angle
+                Theta = math.degrees(math.atan(round(float(DY) / float(DX), 2)))            # Find the Angle
+                print ("Theta  " + str(Theta))
+
+                M = cv2.getRotationMatrix2D((cols / 2, rows / 2), Theta, 1)                 # Find the Rotation Matrix
+                Image = cv2.warpAffine(Image, M, (cols, rows))
+                                                              
+
+                Face2 = face.detectMultiScale(Image, 1.3, 5)                                # This detects a face in the image
+                for (FaceX, FaceY, FaceWidth, FaceHeight) in Face2:
+                    CroppedFace = Image[FaceY: FaceY + FaceHeight, FaceX: FaceX + FaceWidth]
+                    return CroppedFace
+                
+def time_passed():
+    print ('TIME PASSED ' + str(round(((time.perf_counter() - current)/60), 2)) + ' MINS')                
+                                     
+ 
+
+    
+    
