@@ -1,0 +1,37 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Nov 13 22:45:43 2021
+
+@author: tmdis
+"""
+
+import cv2
+import NameFind
+
+
+face_cascade = cv2.CascadeClassifier(r'C:\Users\tmdis\OneDrive\Documents\Lib\site-packages\cv2\data\haarcascade_frontalface_alt.xml')
+eye_cascade = cv2.CascadeClassifier(r'C:\Users\tmdis\OneDrive\Documents\Lib\site-packages\cv2\data\haarcascade_eye.xml')
+recognize = cv2.face.FisherFaceRecognizer_create(5,600)
+recognize.read("trainingDataFisher.xml")
+
+cap = cv2.VideoCapture(0)
+ID = 0
+
+while True:
+    ret,img = cap.read()
+    gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    faces = face_cascade.detectMultiScale(gray,1.3,4)
+    for(x,y,w,h) in faces:
+        gray_face = cv2.resize((gray[y:y+h,x:x+w]),(110,110))
+        
+        eyes = eye_cascade.detectMultiScale(gray_face)
+        for (ex,ey,ew,eh) in eyes:
+            ID,conf = recognize.predict(gray_face)
+            NAME = NameFind.ID_to_Name(ID,conf)
+            #NameFind.DispID(x,y,w,h,ID,conf,gray)
+            cv2.putText(gray,NAME,(50,50),cv2.FONT_HERSHEY_DUPLEX,0.6,[255,255,255],1)
+    cv2.imshow('Fisherface face Recognition System', gray)
+    if cv2.waitKey(1) & 0xFF == ord('t'):
+        break
+cap.release()
+cv2.destroyAllWindows()        
